@@ -10,7 +10,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Tool {
 
@@ -65,17 +67,48 @@ public class Tool {
 
     public List<String> toList(Root root){
         List<String> ans = new ArrayList<>();
+        int high = 0, middle = 0;
+        Map<String,Integer> highCountMap = new HashMap<>();
+        Map<String,List<String>> highStrMap = new HashMap<>();
         for (Pos pos : root.getData().getHighlist()) {
-            String areaName = pos.getArea_name();
+            highCountMap.put(pos.getProvince(),highCountMap.getOrDefault(pos.getProvince(),0)+pos.getCommunitys().size());
+            high += pos.getCommunitys().size();
+            StringBuffer tmp = new StringBuffer();
+            tmp.append(pos.getArea_name()+":");
             for (String community : pos.getCommunitys()) {
-                ans.add(areaName+community);
+                tmp.append(community);
+                tmp.append("、");
             }
+            tmp.deleteCharAt(tmp.length()-1);
+            List<String> list = highStrMap.getOrDefault(pos.getProvince(), new ArrayList<>());
+            list.add(tmp.toString());
+            highStrMap.put(pos.getProvince(),list);
         }
+        ans.add("高风险"+high+"个");
+        for (String s : highStrMap.keySet()) {
+            ans.add(s+highCountMap.get(s)+"个");
+            ans.addAll(highStrMap.get(s));
+        }
+        Map<String,Integer> middleCountMap = new HashMap<>();
+        Map<String,List<String>> middleStrMap = new HashMap<>();
         for (Pos pos : root.getData().getMiddlelist()) {
-            String areaName = pos.getArea_name();
+            middleCountMap.put(pos.getProvince(),middleCountMap.getOrDefault(pos.getProvince(),0)+pos.getCommunitys().size());
+            middle += pos.getCommunitys().size();
+            StringBuffer tmp = new StringBuffer();
+            tmp.append(pos.getArea_name()+":");
             for (String community : pos.getCommunitys()) {
-                ans.add(areaName+community);
+                tmp.append(community);
+                tmp.append("、");
             }
+            tmp.deleteCharAt(tmp.length()-1);
+            List<String> list = middleStrMap.getOrDefault(pos.getProvince(), new ArrayList<>());
+            list.add(tmp.toString());
+            middleStrMap.put(pos.getProvince(),list);
+        }
+        ans.add("中风险"+middle+"个");
+        for (String s : middleStrMap.keySet()) {
+            ans.add(s+middleCountMap.get(s)+"个");
+            ans.addAll(middleStrMap.get(s));
         }
         return ans;
     }
