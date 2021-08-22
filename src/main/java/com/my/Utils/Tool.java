@@ -4,11 +4,13 @@ import com.google.gson.Gson;
 import com.my.Pojo.Pos;
 import com.my.Pojo.Root;
 
+import javax.net.ssl.*;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +27,17 @@ public class Tool {
         StringBuffer resultBuffer = null;
 
         try {
+            SSLContext sslContext = SSLContext.getInstance("SSL","SunJSSE");
+            TrustManager[] tm = {new MyX509TrustManager()};
+            sslContext.init(null,tm,new SecureRandom());
+            HostnameVerifier ignore = new HostnameVerifier() {
+                @Override
+                public boolean verify(String s, SSLSession sslSession) {
+                    return true;
+                }
+            };
+            HttpsURLConnection.setDefaultHostnameVerifier(ignore);
+            HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
             URL url = new URL(urlParam);
             //得到连接对象
             con = (HttpURLConnection) url.openConnection();
